@@ -159,7 +159,11 @@ template <supported_integer T>
         const auto byte = static_cast<unsigned_type>(std::to_integer<unsigned int>((*bytes)[i]));
         bits |= static_cast<unsigned_type>(byte << (i * 8));
     }
-    value = static_cast<U>(bits);
+    if constexpr (std::is_signed_v<U>) {
+        value = std::bit_cast<U>(bits);
+    } else {
+        value = bits;
+    }
     return {};
 }
 
