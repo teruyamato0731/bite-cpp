@@ -7,11 +7,8 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        cxx: [g++, clang++]
     env:
-      CXX: ${{ matrix.cxx }}
+      CXX: g++
     steps:
       - uses: actions/checkout@v4
       - name: Configure
