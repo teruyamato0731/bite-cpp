@@ -6,11 +6,13 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
-      CXX: g++
+      CXX: g++-14
     steps:
       - uses: actions/checkout@v4
+      - name: Compiler version
+        run: $CXX --version
       - name: Configure
         run: cmake -S . -B build -DBITE_BUILD_TESTS=ON -DBITE_BUILD_EXAMPLES=ON
       - name: Build
