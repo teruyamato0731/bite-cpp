@@ -2,7 +2,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <tuple>
-#include <type_traits>
 
 #include <bite/bite.hpp>
 
@@ -11,8 +10,7 @@ struct MotorCommand {
     float torque;
     std::uint8_t mode;
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, MotorCommand>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.velocity, self.torque, self.mode);
     }

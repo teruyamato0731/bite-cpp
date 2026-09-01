@@ -7,6 +7,8 @@ The v0.1 core is header-only, zero-allocation, exception-free, RTTI-free, and ba
 ## Requirements
 
 - C++23
+- a compiler with C++23 explicit object parameter support (deducing `this`); GCC 14.2 is tested
+- C++23 `std::expected`
 - 8-bit bytes (`CHAR_BIT == 8`)
 - IEEE 754 binary32 `float`
 - IEEE 754 binary64 `double`
@@ -18,7 +20,6 @@ The v0.1 core is header-only, zero-allocation, exception-free, RTTI-free, and ba
 #include <cstddef>
 #include <cstdint>
 #include <tuple>
-#include <type_traits>
 
 #include <bite/bite.hpp>
 
@@ -27,8 +28,7 @@ struct MotorCommand {
     float torque;
     std::uint8_t mode;
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, MotorCommand>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.velocity, self.torque, self.mode);
     }
@@ -64,22 +64,23 @@ int main()
 
 ## User-defined structs
 
-C++23 has no standard reflection, so serializable fields are explicitly listed with an ADL-found `bite_fields()` function:
+C++23 has no standard reflection, so serializable fields are explicitly listed by a public `bite_fields()` member function using an explicit object parameter:
 
 ```cpp
 struct Position {
     float x;
     float y;
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, Position>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.x, self.y);
     }
 };
 ```
 
-The tuple order returned by `bite_fields()` is the wire order. The generic `auto&` form works for both mutable objects during decode and const objects during encode. The class-specific `requires` is important when multiple serializable classes live in the same namespace: without it, multiple hidden-friend `bite_fields(auto&)` definitions would redeclare the same unconstrained function template. Nested registered structs, arrays, and tuples are handled recursively.
+The `this auto& self` form deduces the cv-qualification of the object. Calling `bite_fields()` on a const object during encode therefore returns a tuple of const field references, while calling it on a mutable destination during decode returns mutable field references. One definition handles both cases.
+
+The tuple order returned by `bite_fields()` is the wire order. Nested user-defined structs, arrays, and tuples are handled recursively.
 
 Decoded user-defined types must currently be default-initializable so `bite::decode<T>()` can create the destination object before assigning its listed fields.
 
@@ -91,7 +92,7 @@ Decoded user-defined types must currently be default-initializable so `bite::dec
 - enums, encoded through their underlying type
 - `std::array<T, N>`
 - `std::tuple<T...>`
-- user-defined structs registered with `bite_fields()`
+- user-defined structs with a `bite_fields()` member function
 
 All supported v0.1 types have a compile-time wire size:
 
@@ -118,7 +119,7 @@ add_subdirectory(path/to/bite-cpp)
 target_link_libraries(your_target PRIVATE bite::bite)
 ```
 
-The `bite::bite` interface target requires C++23.
+The `bite::bite` interface target requires C++23. The selected compiler must also implement C++23 explicit object parameters and `std::expected`; accepting `-std=c++23` alone is not sufficient.
 
 To build this repository directly:
 
@@ -130,6 +131,6 @@ ctest --test-dir build --output-on-failure
 
 ## Current limitations
 
-v0.1 intentionally does not include variable-length or protocol-layer features. In particular, it does not support `std::optional`, `std::variant`, `std::vector`, strings/string views, variable-length sequences, enum-value validation, bit packing, CRC, framing, message IDs, protocol versioning, COBS/SLIP, transport abstractions, ROS/STM32 HAL integration, custom endianness, or zero-copy decode views.
+v0.1 intentionally does not include variable-length or protocol-layer features. In particular, it does not support `std::optional`, `std::variant`, `std::vector`, strings/string views, variable-length sequences, enum-value validation, bit packing, CRC, framing, message IDs, protocol versioning, COBS/SLIP, transport abstractions, ROS/STM32 HAL integration, custom endianness, non-intrusive type registration, or zero-copy decode views.
 
 The core codec is recursive so these can be added later without changing the field-by-field wire-format model.

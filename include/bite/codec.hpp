@@ -29,13 +29,22 @@ template <class T>
 using unqualified_t = std::remove_cvref_t<T>;
 
 template <class T>
-concept has_bite_fields = requires(T& value) {
-    bite_fields(value);
-    requires noexcept(bite_fields(value));
+concept has_mutable_bite_fields = requires(T& value) {
+    value.bite_fields();
+    requires noexcept(value.bite_fields());
 };
 
 template <class T>
-using bite_fields_t = decltype(bite_fields(std::declval<T&>()));
+concept has_const_bite_fields = requires(const T& value) {
+    value.bite_fields();
+    requires noexcept(value.bite_fields());
+};
+
+template <class T>
+concept has_bite_fields = has_mutable_bite_fields<T> && has_const_bite_fields<T>;
+
+template <class T>
+using bite_fields_t = decltype(std::declval<T&>().bite_fields());
 
 template <class T>
 struct is_std_array : std::false_type {};
@@ -232,8 +241,8 @@ template <class T>
         return result;
     } else if constexpr (is_std_tuple_v<U>) {
         return encode_tuple(value, output);
-    } else if constexpr (has_bite_fields<const U>) {
-        auto fields = bite_fields(value);
+    } else if constexpr (has_const_bite_fields<U>) {
+        auto fields = value.bite_fields();
         static_assert(is_std_tuple_v<decltype(fields)>, "bite_fields() must return std::tuple");
         return encode_tuple(fields, output);
     } else {
@@ -300,8 +309,8 @@ template <class T>
         return result;
     } else if constexpr (is_std_tuple_v<U>) {
         return decode_tuple(value, input);
-    } else if constexpr (has_bite_fields<U>) {
-        auto fields = bite_fields(value);
+    } else if constexpr (has_mutable_bite_fields<U>) {
+        auto fields = value.bite_fields();
         static_assert(is_std_tuple_v<decltype(fields)>, "bite_fields() must return std::tuple");
         return decode_tuple(fields, input);
     } else {

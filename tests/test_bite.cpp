@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 #include <bite/bite.hpp>
 
@@ -12,12 +13,12 @@ namespace {
 
 int failures = 0;
 
-#define CHECK(...)                                                                            \
-    do {                                                                                            \
-        if (!(__VA_ARGS__)) {                                                                         \
+#define CHECK(...)                                                                                 \
+    do {                                                                                           \
+        if (!(__VA_ARGS__)) {                                                                      \
             std::fprintf(stderr, "CHECK failed at %s:%d: %s\n", __FILE__, __LINE__, #__VA_ARGS__); \
-            ++failures;                                                                             \
-        }                                                                                           \
+            ++failures;                                                                            \
+        }                                                                                          \
     } while (false)
 
 template <std::size_t N>
@@ -53,8 +54,7 @@ struct Position {
     float x{};
     float y{};
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, Position>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.x, self.y);
     }
@@ -66,8 +66,7 @@ struct Padded {
     std::uint8_t a{};
     std::uint32_t b{};
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, Padded>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.a, self.b);
     }
@@ -80,8 +79,7 @@ struct RobotState {
     Position position{};
     std::array<std::int16_t, 4> sensors{};
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, RobotState>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.id, self.position, self.sensors);
     }
@@ -93,12 +91,18 @@ struct BoolPacket {
     std::uint16_t prefix{};
     bool enabled{};
 
-    friend constexpr auto bite_fields(auto& self) noexcept
-        requires std::same_as<std::remove_cvref_t<decltype(self)>, BoolPacket>
+    constexpr auto bite_fields(this auto& self) noexcept
     {
         return std::tie(self.prefix, self.enabled);
     }
 };
+
+static_assert(std::same_as<
+              decltype(std::declval<RobotState&>().bite_fields()),
+              std::tuple<std::uint32_t&, Position&, std::array<std::int16_t, 4>&>>);
+static_assert(std::same_as<
+              decltype(std::declval<const RobotState&>().bite_fields()),
+              std::tuple<const std::uint32_t&, const Position&, const std::array<std::int16_t, 4>&>>);
 
 static_assert(bite::fixed_encoded_size_v<std::uint8_t> == 1);
 static_assert(bite::fixed_encoded_size_v<std::int64_t> == 8);
