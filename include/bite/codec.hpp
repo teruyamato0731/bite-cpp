@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BITE_CODEC_HPP
+#define BITE_CODEC_HPP
 
 #include <array>
 #include <bit>
@@ -21,9 +22,6 @@ namespace bite {
 namespace detail {
 
 static_assert(CHAR_BIT == 8, "bite requires 8-bit bytes");
-
-template <class>
-inline constexpr bool always_false_v = false;
 
 template <class T>
 using unqualified_t = std::remove_cvref_t<T>;
@@ -124,7 +122,7 @@ consteval std::size_t fixed_encoded_size()
         static_assert(is_std_tuple_v<fields_type>, "bite_fields() must return std::tuple");
         return fixed_encoded_size<fields_type>();
     } else {
-        static_assert(always_false_v<U>, "bite: unsupported type");
+        static_assert(false, "bite: unsupported type");
         return 0;
     }
 }
@@ -246,7 +244,7 @@ template <class T>
         static_assert(is_std_tuple_v<decltype(fields)>, "bite_fields() must return std::tuple");
         return encode_tuple(fields, output);
     } else {
-        static_assert(always_false_v<U>, "bite: unsupported type for encode");
+        static_assert(false, "bite: unsupported type for encode");
         return {};
     }
 }
@@ -314,7 +312,7 @@ template <class T>
         static_assert(is_std_tuple_v<decltype(fields)>, "bite_fields() must return std::tuple");
         return decode_tuple(fields, input);
     } else {
-        static_assert(always_false_v<U>, "bite: unsupported type for decode");
+        static_assert(false, "bite: unsupported type for decode");
         return {};
     }
 }
@@ -359,3 +357,5 @@ template <class T>
 }
 
 }  // namespace bite
+
+#endif  // BITE_CODEC_HPP

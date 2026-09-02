@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BITE_WRITER_HPP
+#define BITE_WRITER_HPP
 
 #include <cstddef>
 #include <expected>
@@ -33,3 +34,5 @@ private:
 };
 
 }  // namespace bite
+
+#endif  // BITE_WRITER_HPP

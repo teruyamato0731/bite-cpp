@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BITE_READER_HPP
+#define BITE_READER_HPP
 
 #include <cstddef>
 #include <expected>
@@ -32,3 +33,5 @@ private:
 };
 
 }  // namespace bite
+
+#endif  // BITE_READER_HPP

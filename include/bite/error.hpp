@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BITE_ERROR_HPP
+#define BITE_ERROR_HPP
 
 #include <cstddef>
 
@@ -19,3 +20,5 @@ struct error {
 };
 
 }  // namespace bite
+
+#endif  // BITE_ERROR_HPP
