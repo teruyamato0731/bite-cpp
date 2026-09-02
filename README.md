@@ -103,6 +103,35 @@ static_assert(bite::fixed_encoded_size_v<MotorCommand> == 9);
 
 The size is computed recursively from the wire format and never from `sizeof(struct)`.
 
+## Portable wire schemas
+
+`bite` encodes integral types using their actual width on the target platform. Types such as `int`, `long`, and `unsigned long` may therefore produce different wire formats on different architectures or ABIs.
+
+For protocols shared between embedded targets and desktop/Linux systems, prefer explicitly sized integer types:
+
+```cpp
+std::uint8_t
+std::uint16_t
+std::uint32_t
+std::uint64_t
+std::int8_t
+std::int16_t
+std::int32_t
+std::int64_t
+```
+
+Similarly, enums are encoded using their underlying integer type, which determines their wire width. For portable protocols, explicitly specify the enum's underlying type:
+
+```cpp
+enum class Mode : std::uint8_t {
+    stop,
+    velocity,
+    torque,
+};
+```
+
+Platform-dependent integer types remain supported, but the resulting wire format is portable only between targets where those types have the same width and representation.
+
 ## Errors
 
 `bite::error` contains an `error_code` and a byte `offset`:
