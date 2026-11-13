@@ -11,18 +11,11 @@ defaults:
 jobs:
   build-test:
     runs-on: ubuntu-26.04
-    env:
-      CXX: g++-14
     steps:
       - uses: actions/checkout@v7
-      - name: Compiler version
-        run: $CXX --version
-      - name: Configure
-        run: cmake -S . -B build -DBITE_BUILD_TESTS=ON -DBITE_BUILD_EXAMPLES=ON
-      - name: Build
-        run: cmake --build build --parallel
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
+      - uses: jdx/mise-action@v5
+      - name: Run tests
+        run: mise run test
 
   format:
     runs-on: ubuntu-26.04
