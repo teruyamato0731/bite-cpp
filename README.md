@@ -24,37 +24,35 @@ The v0.1 core is header-only, zero-allocation, exception-free, RTTI-free, and ba
 #include <bite/bite.hpp>
 
 struct MotorCommand {
-    float velocity;
-    float torque;
-    std::uint8_t mode;
+  float velocity;
+  float torque;
+  std::uint8_t mode;
 
-    constexpr auto bite_fields(this auto& self) noexcept
-    {
-        return std::tie(self.velocity, self.torque, self.mode);
-    }
+  constexpr auto bite_fields(this auto& self) noexcept {
+    return std::tie(self.velocity, self.torque, self.mode);
+  }
 };
 
-int main()
-{
-    const MotorCommand command{
-        .velocity = 1.0F,
-        .torque = 0.5F,
-        .mode = 2,
-    };
+int main() {
+  const MotorCommand command{
+    .velocity = 1.0F,
+    .torque = 0.5F,
+    .mode = 2,
+  };
 
-    std::array<std::byte, bite::fixed_encoded_size_v<MotorCommand>> buffer{};
+  std::array<std::byte, bite::fixed_encoded_size_v<MotorCommand>> buffer{};
 
-    const auto encoded = bite::encode(command, buffer);
-    if (!encoded) {
-        return 1;
-    }
+  const auto encoded = bite::encode(command, buffer);
+  if (!encoded) {
+    return 1;
+  }
 
-    const auto decoded = bite::decode<MotorCommand>(buffer);
-    if (!decoded) {
-        return 1;
-    }
+  const auto decoded = bite::decode<MotorCommand>(buffer);
+  if (!decoded) {
+    return 1;
+  }
 
-    return 0;
+  return 0;
 }
 ```
 
@@ -68,13 +66,12 @@ C++23 has no standard reflection, so serializable fields are explicitly listed b
 
 ```cpp
 struct Position {
-    float x;
-    float y;
+  float x;
+  float y;
 
-    constexpr auto bite_fields(this auto& self) noexcept
-    {
-        return std::tie(self.x, self.y);
-    }
+  constexpr auto bite_fields(this auto& self) noexcept {
+    return std::tie(self.x, self.y);
+  }
 };
 ```
 
@@ -124,9 +121,9 @@ Similarly, enums are encoded using their underlying integer type, which determin
 
 ```cpp
 enum class Mode : std::uint8_t {
-    stop,
-    velocity,
-    torque,
+  stop,
+  velocity,
+  torque,
 };
 ```
 
