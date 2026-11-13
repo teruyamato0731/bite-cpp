@@ -7,6 +7,7 @@ CXX = "g++-15"
 "apt:g++-15" = "latest"
 "apt:clangd-21" = "latest"
 "apt:clang-format-21" = "latest"
+"apt:libgtest-dev" = "latest"
 
 [tasks.setup]
 description = "Install system dependencies"

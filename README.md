@@ -7,7 +7,7 @@ The v0.1 core is header-only, zero-allocation, exception-free, RTTI-free, and ba
 ## Requirements
 
 - C++23
-- a compiler with C++23 explicit object parameter support (deducing `this`); GCC 14.2 is tested
+- a compiler with C++23 explicit object parameter support (deducing `this`); GCC 15.2 is tested
 - C++23 `std::expected`
 - 8-bit bytes (`CHAR_BIT == 8`)
 - IEEE 754 binary32 `float`
@@ -154,6 +154,8 @@ cmake -S . -B build -DBITE_BUILD_TESTS=ON -DBITE_BUILD_EXAMPLES=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+When `BITE_BUILD_TESTS` is enabled, CMake uses a system GoogleTest (at least 1.17.0) when available. Otherwise, it downloads the pinned GoogleTest 1.17.0 release using FetchContent. Running `mise run setup` installs the system package on Ubuntu.
 
 ## Current limitations
 
