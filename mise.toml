@@ -1,0 +1,36 @@
+[env]
+CXX = "g++-15"
+
+[bootstrap.packages]
+"apt:build-essential" = "latest"
+"apt:cmake" = "latest"
+"apt:g++-15" = "latest"
+"apt:clangd-21" = "latest"
+"apt:clang-format-21" = "latest"
+
+[tasks.setup]
+description = "Install system dependencies"
+run = "mise bootstrap packages apply"
+
+[tasks.configure]
+description = "Configure CMake"
+run = """
+cmake -S . -B build \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DBITE_BUILD_TESTS=ON \
+  -DBITE_BUILD_EXAMPLES=ON
+"""
+
+[tasks.build]
+description = "Build the project"
+depends = ["configure"]
+run = "cmake --build build --parallel"
+
+[tasks.test]
+description = "Run tests"
+depends = ["build"]
+run = "ctest --test-dir build --output-on-failure"
+
+[tasks.clean]
+description = "Remove build artifacts"
+run = "cmake -E rm -rf build"
